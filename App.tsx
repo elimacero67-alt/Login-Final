@@ -429,7 +429,6 @@ const LoginView = ({ setView, onLogin, supabaseClient, isSupabaseMode }: any) =>
       <div className="text-center mb-8">
         <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">¡Bienvenido!</h2>
         <p className="text-slate-500 mt-2 font-medium">Inicia sesión para continuar</p>
-        {isSupabaseMode && <span className="inline-block mt-2 px-2 py-0.5 bg-emerald-100 text-emerald-600 text-[10px] font-bold rounded-full uppercase tracking-wider">Modo Real</span>}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-1">
