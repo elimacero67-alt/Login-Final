@@ -12,7 +12,7 @@ import {
   LogOut, 
   ShieldCheck, 
   AlertCircle, 
-  ChevronLeft,
+  ChevronLeft, 
   Sparkles,
   LogIn,
   UserPlus,
@@ -26,13 +26,20 @@ import {
   WifiOff
 } from 'lucide-react';
 
+// --- Fix for TS errors regarding window.supabase ---
+declare global {
+  interface Window {
+    supabase: any;
+  }
+}
+
 // --- Constantes por Defecto (Supabase) ---
 const DEFAULT_SUPABASE_URL = 'https://hxwwosakghlxmknfgpni.supabase.co';
 const DEFAULT_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4d3dvc2FrZ2hseG1rbmZncG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjQwODMsImV4cCI6MjA4NjUwMDA4M30.irZumKPpfVoY1wzm_Ux4o06KBKM6O_Pkda0LeiPgXvA';
 
 // --- Utilitarios y Validaciones ---
 
-const validateEmail = (email) => {
+const validateEmail = (email: string) => {
   return String(email)
     .toLowerCase()
     .match(
@@ -40,7 +47,7 @@ const validateEmail = (email) => {
     );
 };
 
-const checkPasswordStrength = (password) => {
+const checkPasswordStrength = (password: string) => {
   let score = 0;
   if (!password) return { score: 0, details: [] };
 
@@ -64,6 +71,21 @@ const checkPasswordStrength = (password) => {
 
 // --- Componentes UI Reutilizables ---
 
+interface InputFieldProps {
+  icon: any;
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: any) => void;
+  onFocus?: (e: any) => void;
+  onBlur?: (e: any) => void;
+  error?: string;
+  showPasswordToggle?: boolean;
+  onTogglePassword?: () => void;
+  isPasswordVisible?: boolean;
+  disabled?: boolean;
+}
+
 const InputField = ({ 
   icon: Icon, 
   type, 
@@ -77,7 +99,7 @@ const InputField = ({
   onTogglePassword, 
   isPasswordVisible,
   disabled = false
-}) => (
+}: InputFieldProps) => (
   <div className="mb-4 group">
     <div className="relative flex items-center">
       {/* Icono a la izquierda perfectamente centrado */}
@@ -123,7 +145,7 @@ const InputField = ({
   </div>
 );
 
-const PasswordStrengthMeter = ({ password }) => {
+const PasswordStrengthMeter = ({ password }: { password: string }) => {
   const { score, details } = checkPasswordStrength(password);
   
   const getColor = () => {
@@ -179,7 +201,15 @@ const PasswordStrengthMeter = ({ password }) => {
   );
 };
 
-const Button = ({ children, onClick, isLoading, variant = 'primary', className = '' }) => {
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick: (e?: any) => void;
+  isLoading?: boolean;
+  variant?: 'primary' | 'secondary' | 'danger';
+  className?: string;
+}
+
+const Button = ({ children, onClick, isLoading = false, variant = 'primary', className = '' }: ButtonProps) => {
   const baseStyle = "w-full py-3.5 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2 transform active:scale-[0.98]";
   
   const variants = {
@@ -192,7 +222,7 @@ const Button = ({ children, onClick, isLoading, variant = 'primary', className =
     <button 
       onClick={onClick} 
       disabled={isLoading}
-      className={`${baseStyle} ${variants[variant]} ${className} ${isLoading ? 'opacity-80 cursor-wait' : ''}`}
+      className={`${baseStyle} ${variants[variant as keyof typeof variants]} ${className} ${isLoading ? 'opacity-80 cursor-wait' : ''}`}
     >
       {isLoading ? (
         <motion.div 
@@ -205,7 +235,7 @@ const Button = ({ children, onClick, isLoading, variant = 'primary', className =
   );
 };
 
-const HeaderIcon = ({ icon: Icon }) => (
+const HeaderIcon = ({ icon: Icon }: { icon: any }) => (
   <div className="flex justify-center mb-6">
     <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100">
       <Icon size={32} strokeWidth={1.5} />
@@ -215,7 +245,7 @@ const HeaderIcon = ({ icon: Icon }) => (
 
 // --- Componente de Barra Lateral (Configuración Supabase) ---
 
-const ConfigSidebar = ({ onConnect, isConnected, connectionError }) => {
+const ConfigSidebar = ({ onConnect, isConnected, connectionError }: { onConnect: any, isConnected: boolean, connectionError: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [config, setConfig] = useState({ 
     url: DEFAULT_SUPABASE_URL, 
@@ -330,7 +360,7 @@ const ConfigSidebar = ({ onConnect, isConnected, connectionError }) => {
 
 // --- Vistas del Sistema ---
 
-const LoginView = ({ setView, onLogin, supabaseClient, isSupabaseMode }) => {
+const LoginView = ({ setView, onLogin, supabaseClient, isSupabaseMode }: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -338,7 +368,7 @@ const LoginView = ({ setView, onLogin, supabaseClient, isSupabaseMode }) => {
   const [showPass, setShowPass] = useState(false);
   const [shake, setShake] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setError('');
     
@@ -365,7 +395,7 @@ const LoginView = ({ setView, onLogin, supabaseClient, isSupabaseMode }) => {
           email: data.user.email 
         });
 
-      } catch (err) {
+      } catch (err: any) {
         setError('Credenciales incorrectas o usuario no encontrado.');
         setShake(true);
         setTimeout(() => setShake(false), 500);
@@ -462,7 +492,7 @@ const LoginView = ({ setView, onLogin, supabaseClient, isSupabaseMode }) => {
   );
 };
 
-const RegisterView = ({ setView, onLogin, supabaseClient, isSupabaseMode }) => {
+const RegisterView = ({ setView, onLogin, supabaseClient, isSupabaseMode }: any) => {
   const [formData, setFormData] = useState({ name: '', surname: '', email: '', password: '', confirmPassword: '' });
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
@@ -471,7 +501,7 @@ const RegisterView = ({ setView, onLogin, supabaseClient, isSupabaseMode }) => {
   const [shake, setShake] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setError('');
 
@@ -525,7 +555,7 @@ const RegisterView = ({ setView, onLogin, supabaseClient, isSupabaseMode }) => {
            setIsSuccess(true);
         }
 
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message || 'Error al registrarse');
         setShake(true);
         setTimeout(() => setShake(false), 500);
@@ -672,13 +702,13 @@ const RegisterView = ({ setView, onLogin, supabaseClient, isSupabaseMode }) => {
   );
 };
 
-const RecoveryView = ({ setView, supabaseClient, isSupabaseMode }) => {
+const RecoveryView = ({ setView, supabaseClient, isSupabaseMode }: any) => {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
   const [shake, setShake] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setError('');
     if (!validateEmail(email)) {
@@ -716,7 +746,7 @@ const RecoveryView = ({ setView, supabaseClient, isSupabaseMode }) => {
         if (resetError) throw resetError;
         
         setStatus('success');
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message || 'Error al procesar la solicitud.');
         setStatus('idle');
       }
@@ -802,7 +832,7 @@ const RecoveryView = ({ setView, supabaseClient, isSupabaseMode }) => {
   );
 };
 
-const ResetPasswordView = ({ setView, supabaseClient }) => {
+const ResetPasswordView = ({ setView, supabaseClient }: any) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -812,7 +842,7 @@ const ResetPasswordView = ({ setView, supabaseClient }) => {
   const [shake, setShake] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setError('');
 
@@ -837,7 +867,7 @@ const ResetPasswordView = ({ setView, supabaseClient }) => {
         const { error } = await supabaseClient.auth.updateUser({ password: password });
         if (error) throw error;
         setIsSuccess(true);
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message || 'Error al actualizar contraseña');
         setShake(true);
         setTimeout(() => setShake(false), 500);
@@ -945,7 +975,7 @@ const ResetPasswordView = ({ setView, supabaseClient }) => {
   );
 };
 
-const Dashboard = ({ user, onLogout, isSupabaseMode }) => (
+const Dashboard = ({ user, onLogout, isSupabaseMode }: any) => (
   <motion.div 
     initial={{ opacity: 0, scale: 0.9 }}
     animate={{ opacity: 1, scale: 1 }}
@@ -988,8 +1018,8 @@ const Dashboard = ({ user, onLogout, isSupabaseMode }) => (
 
 export default function App() {
   const [view, setView] = useState('login'); 
-  const [user, setUser] = useState(null); 
-  const [supabaseClient, setSupabaseClient] = useState(null);
+  const [user, setUser] = useState<any>(null); 
+  const [supabaseClient, setSupabaseClient] = useState<any>(null);
   const [isSupabaseMode, setIsSupabaseMode] = useState(false);
   const [connectionError, setConnectionError] = useState('');
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
@@ -1023,7 +1053,7 @@ export default function App() {
     }
   }, [isScriptLoaded]);
 
-  const handleSupabaseConnect = async (url, key) => {
+  const handleSupabaseConnect = async (url: string, key: string) => {
     setConnectionError('');
     
     if (!window.supabase) {
@@ -1044,7 +1074,7 @@ export default function App() {
           throw new Error('No se pudo conectar al URL proporcionado');
       }
 
-      client.auth.onAuthStateChange((event, session) => {
+      client.auth.onAuthStateChange((event: string, session: any) => {
         if (event === 'PASSWORD_RECOVERY') {
            setView('reset-password');
         }
@@ -1054,14 +1084,14 @@ export default function App() {
       setIsSupabaseMode(true);
       return true;
 
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       if (err.message && err.message.includes('Invalid URL')) {
          setConnectionError('URL inválida');
       } else {
          try {
             const client = window.supabase.createClient(url, key);
-            client.auth.onAuthStateChange((event, session) => {
+            client.auth.onAuthStateChange((event: string, session: any) => {
                 if (event === 'PASSWORD_RECOVERY') {
                    setView('reset-password');
                 }
