@@ -17,13 +17,7 @@ import {
   LogIn,
   UserPlus,
   KeyRound,
-  Contact,
-  Database,
-  Settings,
-  X,
-  Link as LinkIcon,
-  Wifi,
-  WifiOff
+  Contact
 } from 'lucide-react';
 
 // --- Fix for TS errors regarding window.supabase ---
@@ -33,9 +27,9 @@ declare global {
   }
 }
 
-// --- Constantes por Defecto (Supabase) ---
-const DEFAULT_SUPABASE_URL = 'https://hxwwosakghlxmknfgpni.supabase.co';
-const DEFAULT_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4d3dvc2FrZ2hseG1rbmZncG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjQwODMsImV4cCI6MjA4NjUwMDA4M30.irZumKPpfVoY1wzm_Ux4o06KBKM6O_Pkda0LeiPgXvA';
+// --- Constantes Permanentes (Supabase) ---
+const SUPABASE_URL = 'https://hxwwosakghlxmknfgpni.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4d3dvc2FrZ2hseG1rbmZncG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjQwODMsImV4cCI6MjA4NjUwMDA4M30.irZumKPpfVoY1wzm_Ux4o06KBKM6O_Pkda0LeiPgXvA';
 
 // --- Utilitarios y Validaciones ---
 
@@ -103,7 +97,7 @@ const InputField = ({
   <div className="mb-4 group">
     <div className="relative flex items-center">
       {/* Icono a la izquierda perfectamente centrado */}
-      <div className="absolute left-3 flex items-center justify-center pointer-events-none z-10 text-indigo-500/70 group-focus-within:text-indigo-600 transition-colors duration-300">
+      <div className="absolute left-3 flex items-center justify-center pointer-events-none z-10 text-slate-400 group-focus-within:text-cyan-500 transition-colors duration-300">
         <Icon size={20} />
       </div>
       <input
@@ -112,7 +106,7 @@ const InputField = ({
         className={`w-full pl-11 pr-10 py-3.5 bg-slate-50/50 border ${
           error 
             ? 'border-red-400 focus:ring-red-200 bg-red-50/10' 
-            : 'border-slate-200 focus:ring-indigo-100 focus:border-indigo-400'
+            : 'border-slate-200 focus:ring-cyan-100 focus:border-cyan-400'
         } rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-4 transition-all duration-300 backdrop-blur-sm relative z-0 disabled:opacity-50 disabled:cursor-not-allowed`}
         placeholder={placeholder}
         value={value}
@@ -124,7 +118,7 @@ const InputField = ({
         <button
           type="button"
           onClick={onTogglePassword}
-          className="absolute right-3 flex items-center justify-center z-10 text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"
+          className="absolute right-3 flex items-center justify-center z-10 text-slate-400 hover:text-cyan-600 transition-colors cursor-pointer"
         >
           {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
@@ -212,9 +206,10 @@ interface ButtonProps {
 const Button = ({ children, onClick, isLoading = false, variant = 'primary', className = '' }: ButtonProps) => {
   const baseStyle = "w-full py-3.5 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2 transform active:scale-[0.98]";
   
+  // Updated Primary Variant to match Logo Gradient (Purple -> Cyan)
   const variants = {
-    primary: "bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 border border-transparent",
-    secondary: "bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 hover:border-indigo-200 hover:text-indigo-600 shadow-sm",
+    primary: "bg-gradient-to-r from-violet-600 via-blue-500 to-cyan-500 hover:from-violet-700 hover:to-cyan-600 text-white shadow-lg shadow-cyan-500/20 border border-transparent",
+    secondary: "bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 hover:border-cyan-200 hover:text-cyan-600 shadow-sm",
     danger: "bg-red-50 text-red-600 hover:bg-red-100 border border-red-100"
   };
 
@@ -237,126 +232,11 @@ const Button = ({ children, onClick, isLoading = false, variant = 'primary', cla
 
 const HeaderIcon = ({ icon: Icon }: { icon: any }) => (
   <div className="flex justify-center mb-6">
-    <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100">
+    <div className="w-16 h-16 bg-gradient-to-tr from-violet-50 to-cyan-50 rounded-2xl flex items-center justify-center text-violet-600 shadow-sm border border-violet-100/50">
       <Icon size={32} strokeWidth={1.5} />
     </div>
   </div>
 );
-
-// --- Componente de Barra Lateral (Configuración Supabase) ---
-
-const ConfigSidebar = ({ onConnect, isConnected, connectionError }: { onConnect: any, isConnected: boolean, connectionError: string }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [config, setConfig] = useState({ 
-    url: DEFAULT_SUPABASE_URL, 
-    key: DEFAULT_SUPABASE_KEY 
-  });
-  const [checking, setChecking] = useState(false);
-
-  const handleConnect = async () => {
-    setChecking(true);
-    await onConnect(config.url, config.key);
-    setChecking(false);
-  };
-
-  return (
-    <>
-      <motion.button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`fixed top-4 left-4 z-50 p-3 rounded-full shadow-lg transition-colors ${
-          isConnected ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-white'
-        }`}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        {isOpen ? <X size={20} /> : (isConnected ? <Wifi size={20} /> : <Settings size={20} />)}
-      </motion.button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ x: -320 }}
-            animate={{ x: 0 }}
-            exit={{ x: -320 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 left-0 h-full w-80 bg-slate-900/95 backdrop-blur-xl border-r border-slate-700 z-40 p-6 pt-20 shadow-2xl"
-          >
-            <div className="flex items-center gap-2 mb-6 text-white">
-              <Database className="text-emerald-400" />
-              <h3 className="font-bold text-lg">Configuración DB</h3>
-            </div>
-
-            <p className="text-slate-400 text-xs mb-6 leading-relaxed">
-              Integra tu proyecto de <span className="text-emerald-400 font-bold">Supabase</span> para habilitar autenticación real.
-            </p>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Project URL</label>
-                <div className="flex items-center bg-slate-800 rounded-lg border border-slate-700 focus-within:border-emerald-500 transition-colors">
-                  <LinkIcon size={14} className="ml-3 text-slate-500" />
-                  <input 
-                    type="text" 
-                    value={config.url}
-                    onChange={(e) => setConfig({...config, url: e.target.value})}
-                    placeholder="https://xyz.supabase.co"
-                    className="w-full bg-transparent p-3 text-sm text-slate-200 focus:outline-none placeholder-slate-600"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Anon API Key</label>
-                <div className="flex items-center bg-slate-800 rounded-lg border border-slate-700 focus-within:border-emerald-500 transition-colors">
-                  <KeyRound size={14} className="ml-3 text-slate-500" />
-                  <input 
-                    type="password" 
-                    value={config.key}
-                    onChange={(e) => setConfig({...config, key: e.target.value})}
-                    placeholder="eyJh..."
-                    className="w-full bg-transparent p-3 text-sm text-slate-200 focus:outline-none placeholder-slate-600"
-                  />
-                </div>
-              </div>
-
-              {connectionError && (
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
-                  <AlertCircle size={14} />
-                  {connectionError}
-                </div>
-              )}
-
-              {isConnected && (
-                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
-                  <Wifi size={14} />
-                  Conexión Exitosa
-                </div>
-              )}
-
-              <button 
-                onClick={handleConnect}
-                disabled={checking}
-                className={`w-full py-3 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                  isConnected 
-                    ? 'bg-slate-700 text-slate-300 cursor-not-allowed' 
-                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/50'
-                }`}
-              >
-                {checking ? 'Verificando...' : (isConnected ? 'Conectado' : 'Conectar Supabase')}
-              </button>
-            </div>
-
-            <div className="mt-8 pt-6 border-t border-slate-800 text-center">
-              <p className="text-xs text-slate-600">
-                Estado: {isConnected ? <span className="text-emerald-400 font-bold">Online</span> : <span className="text-amber-500 font-bold">Modo Demo</span>}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-};
 
 // --- Vistas del Sistema ---
 
@@ -427,7 +307,7 @@ const LoginView = ({ setView, onLogin, supabaseClient, isSupabaseMode }: any) =>
       <HeaderIcon icon={LogIn} />
 
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">¡Bienvenido!</h2>
+        <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-blue-500 to-cyan-500 tracking-tight">SAVIKA</h2>
         <p className="text-slate-500 mt-2 font-medium">Inicia sesión para continuar</p>
       </div>
 
@@ -454,7 +334,7 @@ const LoginView = ({ setView, onLogin, supabaseClient, isSupabaseMode }: any) =>
             <button 
               type="button"
               onClick={() => setView('recovery')} 
-              className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold hover:underline transition-colors"
+              className="text-xs text-cyan-600 hover:text-cyan-700 font-semibold hover:underline transition-colors"
             >
               ¿Olvidaste tu contraseña?
             </button>
@@ -482,7 +362,7 @@ const LoginView = ({ setView, onLogin, supabaseClient, isSupabaseMode }: any) =>
       <div className="mt-8 pt-6 border-t border-slate-100 text-center">
         <p className="text-slate-500 text-sm">
           ¿Aún no tienes cuenta?{' '}
-          <button onClick={() => setView('register')} className="text-indigo-600 font-bold hover:underline">
+          <button onClick={() => setView('register')} className="text-cyan-600 font-bold hover:underline">
             Crear cuenta gratis
           </button>
         </p>
@@ -606,8 +486,8 @@ const RegisterView = ({ setView, onLogin, supabaseClient, isSupabaseMode }: any)
       <HeaderIcon icon={UserPlus} />
 
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-slate-800">Crear Cuenta</h2>
-        <p className="text-slate-500 text-xs font-medium">Empieza tu experiencia hoy</p>
+        <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-blue-500 to-cyan-500 tracking-tight">Crear Cuenta</h2>
+        <p className="text-slate-500 mt-2 text-sm font-medium">Empieza tu experiencia hoy</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
@@ -692,7 +572,7 @@ const RegisterView = ({ setView, onLogin, supabaseClient, isSupabaseMode }: any)
       <div className="mt-6 pt-4 border-t border-slate-100 text-center">
         <p className="text-slate-500 text-sm">
           ¿Ya tienes cuenta?{' '}
-          <button onClick={() => setView('login')} className="text-indigo-600 font-bold hover:underline">
+          <button onClick={() => setView('login')} className="text-cyan-600 font-bold hover:underline">
             Inicia Sesión
           </button>
         </p>
@@ -802,7 +682,7 @@ const RecoveryView = ({ setView, supabaseClient, isSupabaseMode }: any) => {
       exit={{ opacity: 0, y: -30 }}
       className="relative"
     >
-      <button onClick={() => setView('login')} className="absolute -top-12 left-0 flex items-center text-slate-400 hover:text-indigo-600 transition-colors group">
+      <button onClick={() => setView('login')} className="absolute -top-12 left-0 flex items-center text-slate-400 hover:text-cyan-600 transition-colors group">
         <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" /> 
       </button>
       
@@ -981,11 +861,11 @@ const Dashboard = ({ user, onLogout, isSupabaseMode }: any) => (
     exit={{ opacity: 0, scale: 1.1 }}
     className="bg-white/90 backdrop-blur-xl w-full max-w-md p-8 rounded-3xl shadow-2xl border border-white/50 text-center relative overflow-hidden"
   >
-    <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-10" />
+    <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-violet-600 via-blue-500 to-cyan-500 opacity-10" />
     
     <div className="relative z-10">
       <div className="w-24 h-24 bg-white p-1.5 rounded-full mx-auto mb-4 shadow-xl mt-4">
-        <div className="w-full h-full bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white">
+        <div className="w-full h-full bg-gradient-to-tr from-violet-500 to-cyan-500 rounded-full flex items-center justify-center text-white">
           <User size={48} />
         </div>
       </div>
@@ -1020,7 +900,6 @@ export default function App() {
   const [user, setUser] = useState<any>(null); 
   const [supabaseClient, setSupabaseClient] = useState<any>(null);
   const [isSupabaseMode, setIsSupabaseMode] = useState(false);
-  const [connectionError, setConnectionError] = useState('');
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
 
   useEffect(() => {
@@ -1046,27 +925,18 @@ export default function App() {
     document.body.appendChild(script);
   }, []);
 
+  // Auto-connect when script is loaded
   useEffect(() => {
     if (isScriptLoaded && !supabaseClient) {
-      handleSupabaseConnect(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_KEY);
+      handleSupabaseConnect();
     }
   }, [isScriptLoaded]);
 
-  const handleSupabaseConnect = async (url: string, key: string) => {
-    setConnectionError('');
-    
-    if (!window.supabase) {
-      setConnectionError('La librería de Supabase aún no se ha cargado.');
-      return;
-    }
-
-    if (!url || !key) {
-      setConnectionError('URL y Key son requeridos');
-      return;
-    }
+  const handleSupabaseConnect = async () => {
+    if (!window.supabase) return;
 
     try {
-      const client = window.supabase.createClient(url, key);
+      const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       const { error: authError } = await client.auth.getSession();
       
       if (authError && authError.message && authError.message.includes('FetchError')) {
@@ -1081,26 +951,11 @@ export default function App() {
 
       setSupabaseClient(client);
       setIsSupabaseMode(true);
-      return true;
+      console.log("Supabase conectado exitosamente");
 
     } catch (err: any) {
-      console.error(err);
-      if (err.message && err.message.includes('Invalid URL')) {
-         setConnectionError('URL inválida');
-      } else {
-         try {
-            const client = window.supabase.createClient(url, key);
-            client.auth.onAuthStateChange((event: string, session: any) => {
-                if (event === 'PASSWORD_RECOVERY') {
-                   setView('reset-password');
-                }
-            });
-            setSupabaseClient(client);
-            setIsSupabaseMode(true);
-         } catch (e) {
-            setConnectionError('Error al crear cliente Supabase');
-         }
-      }
+      console.error("Error conectando a Supabase:", err);
+      // Fallback a modo local/demo si falla (opcional, pero mantenemos la lógica actual que permite demo si no hay supabase)
     }
   };
 
@@ -1113,18 +968,12 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#f3f4f6] relative flex items-center justify-center p-4 font-sans selection:bg-indigo-100 selection:text-indigo-700 overflow-hidden">
+    <div className="min-h-screen w-full bg-[#f3f4f6] relative flex items-center justify-center p-4 font-sans selection:bg-cyan-100 selection:text-cyan-700 overflow-hidden">
       
-      <ConfigSidebar 
-        onConnect={handleSupabaseConnect} 
-        isConnected={isSupabaseMode} 
-        connectionError={connectionError}
-      />
-
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-300/30 rounded-full mix-blend-multiply filter blur-[100px] animate-blob" />
-        <div className="absolute top-[10%] right-[-10%] w-[50%] h-[50%] bg-purple-300/30 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-2000" />
-        <div className="absolute bottom-[-10%] left-[20%] w-[50%] h-[50%] bg-pink-300/30 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-4000" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-violet-400/30 rounded-full mix-blend-multiply filter blur-[100px] animate-blob" />
+        <div className="absolute top-[10%] right-[-10%] w-[50%] h-[50%] bg-cyan-400/30 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-2000" />
+        <div className="absolute bottom-[-10%] left-[20%] w-[50%] h-[50%] bg-blue-400/30 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-4000" />
       </div>
 
       <AnimatePresence mode='wait'>
@@ -1143,7 +992,7 @@ export default function App() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
             transition={{ type: "spring", stiffness: 100, damping: 20 }}
-            className="bg-white/80 backdrop-blur-2xl w-full max-w-[440px] p-8 sm:p-10 rounded-[2rem] shadow-2xl shadow-indigo-500/10 border border-white/60 relative z-10"
+            className="bg-white/80 backdrop-blur-2xl w-full max-w-[440px] p-8 sm:p-10 rounded-[2rem] shadow-2xl shadow-cyan-500/10 border border-white/60 relative z-10"
           >
             <AnimatePresence mode='wait'>
               {view === 'login' && (
